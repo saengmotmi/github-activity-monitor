@@ -86,3 +86,9 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# tsup 빌드 결과물
+dist/
+
+# Vitest 커버리지 결과물
+coverage/

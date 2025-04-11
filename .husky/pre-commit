@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 변경된 파일에 대해 lint-staged 실행
+pnpm lint-staged
+pnpm test 
