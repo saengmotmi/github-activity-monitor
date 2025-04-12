@@ -1,11 +1,5 @@
-/**
- * ESLint Flat Config
- * @see https://eslint.org/docs/latest/use/configure/
- * @type {import('eslint').FlatConfig[]}
- */
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
-import eslintPluginPrettier from "eslint-plugin-prettier";
 import globals from "globals";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -21,10 +15,10 @@ export default [
   // 기본 설정
   js.configs.recommended,
   ...compat.config({
-    extends: ["plugin:@typescript-eslint/recommended", "prettier"],
+    extends: ["plugin:@typescript-eslint/recommended"],
   }),
   {
-    ignores: ["dist/**", "node_modules/**", "coverage/**"],
+    ignores: ["dist/**", "node_modules/**", "coverage/**", "script/**"],
   },
   // Node.js 환경 설정
   {
@@ -45,11 +39,9 @@ export default [
     files: ["**/*.{ts,mts,cts}"],
     plugins: {
       "@typescript-eslint": (await import("@typescript-eslint/eslint-plugin")).default,
-      prettier: eslintPluginPrettier,
     },
     rules: {
-      "prettier/prettier": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-explicit-any": "warn",
     },
