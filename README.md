@@ -26,3 +26,5 @@ npm run test
 # 테스트 감시 모드
 npm run test:watch
 ```
+
+Testing pre-commit hook.
