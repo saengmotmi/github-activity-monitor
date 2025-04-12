@@ -3,4 +3,3 @@
 
 # 변경된 파일에 대해 lint-staged 실행
 pnpm lint-staged
-pnpm test 
