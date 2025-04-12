@@ -4,5 +4,5 @@
  * @type {import('lint-staged').Config}
  */
 export default {
-  "*.{json,md,yml,yaml}": ["prettier --write"],
+  "*.{json,md,yml,yaml}": ["prettier --write --config dev-configs/prettier.config.mjs"],
 };

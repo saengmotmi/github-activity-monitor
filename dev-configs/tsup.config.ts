@@ -8,9 +8,8 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: ["src/index.ts"],
   format: ["cjs"], // GitHub Actions에서는 CJS만 사용
-  // dts: true,
+
   splitting: false,
-  // sourcemap: true,
   clean: true,
   minify: true,
   target: "node16",

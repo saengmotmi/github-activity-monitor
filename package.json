@@ -8,13 +8,13 @@
     "script"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch --onSuccess \"node script/index.cjs\"",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "lint": "eslint --ext .ts,.tsx src/",
-    "lint:fix": "eslint --ext .ts,.tsx src/ --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "build": "tsup --config dev-configs/tsup.config.ts",
+    "dev": "tsup --watch --config dev-configs/tsup.config.ts --onSuccess \"node script/index.cjs\"",
+    "test": "vitest run -c dev-configs/vitest.config.ts",
+    "test:watch": "vitest -c dev-configs/vitest.config.ts",
+    "lint": "eslint --config dev-configs/eslint.config.js --ext .ts,.tsx src/",
+    "lint:fix": "eslint --config dev-configs/eslint.config.js --ext .ts,.tsx src/ --fix",
+    "format": "prettier --write --config dev-configs/prettier.config.mjs \"src/**/*.{ts,tsx}\"",
     "prepare": "husky",
     "lint-staged": "lint-staged"
   },

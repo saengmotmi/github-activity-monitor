@@ -1,0 +1,33 @@
+{
+  // ESLint 설정 파일 경로 지정
+  "eslint.options": {
+    "configFile": "dev-configs/eslint.config.js"
+  },
+  // Prettier 설정 파일 경로 지정
+  "prettier.configPath": "dev-configs/prettier.config.mjs",
+
+  // ESLint가 TypeScript 파일을 검사하도록 설정
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+  // 특정 파일 타입에 대한 기본 포매터 설정 (선택 사항)
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  }
+}
