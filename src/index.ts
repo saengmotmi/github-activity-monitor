@@ -1,11 +1,22 @@
-/**
- * GitHub Activity Monitor
- */
+import { setupApplication } from "./composition-root";
+import { loadAndValidateConfig } from "./configs/config-loader";
 
-export function greet(name: string): string {
-  return `안녕하세요, ${name}님!`;
+async function bootstrap() {
+  console.log("Bootstrapping application...");
+
+  try {
+    const config = loadAndValidateConfig();
+    const monitor = setupApplication(config);
+
+    // 3. 애플리케이션 실행
+    await monitor.run();
+
+    console.log("Application run finished successfully.");
+  } catch (error) {
+    console.error("Application failed during setup or run:", error);
+    process.exit(1);
+  }
 }
 
-export default {
-  greet,
-};
+console.log("Starting application...");
+bootstrap();
