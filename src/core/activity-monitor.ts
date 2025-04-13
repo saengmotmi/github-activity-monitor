@@ -15,7 +15,7 @@ interface ActivityMonitorDependencies {
 }
 
 export class ActivityMonitor {
-  constructor(private readonly dependencies: ActivityMonitorDependencies) {}
+  public constructor(private readonly dependencies: ActivityMonitorDependencies) {}
 
   public async run(): Promise<void> {
     console.log("ActivityMonitor run starting...");
@@ -32,7 +32,7 @@ export class ActivityMonitor {
 
       const itemsToSend = await this.prepareItemsForNotification(fetchedActivities);
       await this.sendNotifications(itemsToSend, fetchedActivities.length);
-
+      console.log("itemsToSend", itemsToSend, itemsToSend.length);
       this.updateState(currentState, fetchedActivities);
 
       console.log("ActivityMonitor run finished successfully.");

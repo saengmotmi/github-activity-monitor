@@ -21,7 +21,11 @@ export const config: AppVariables = {
       monitorTypes: ["discussion", "discussion_comment"],
     },
     {
-      name: "facebook/react",
+      name: "toss/frontend-fundamentals",
+      monitorTypes: ["discussion", "discussion_comment"],
+    },
+    {
+      name: "GHooN99/blog-v1",
       monitorTypes: ["discussion", "discussion_comment"],
     },
   ],

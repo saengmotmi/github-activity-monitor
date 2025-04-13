@@ -7,11 +7,16 @@ import { defineConfig } from "tsup";
  */
 export default defineConfig({
   entry: ["src/index.ts"],
-  format: ["cjs"], // GitHub Actions에서는 CJS만 사용
-
+  outDir: "script",
+  format: ["esm"],
+  platform: "node",
+  target: "node20",
+  sourcemap: true,
   splitting: false,
   clean: true,
-  minify: true,
-  target: "node16",
-  outDir: "script",
+  outExtension({ format }) {
+    return {
+      js: `.${format === "esm" ? "mjs" : "cjs"}`,
+    };
+  },
 });

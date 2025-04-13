@@ -4,7 +4,7 @@ import { ActivityItem } from "../../models/activity";
 import { IActivitySummarizer } from "./summarizer";
 
 export class NoopSummarizer implements IActivitySummarizer {
-  async summarizeActivities(activities: ActivityItem[]): Promise<ActivityItem[]> {
+  public async summarizeActivities(activities: ActivityItem[]): Promise<ActivityItem[]> {
     console.log("Skipping summarization (NoopSummarizer).");
     return activities;
   }

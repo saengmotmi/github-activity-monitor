@@ -1,22 +1,26 @@
 import { graphql, GraphqlResponseError } from "@octokit/graphql";
-import { ISingleSourceActivityFetcher } from "../../core/interfaces";
 import { ActivityItem, ActivitySourceType } from "../../models/activity";
 import { RepositoryLastProcessed } from "../../models/state";
+import { ISingleSourceActivityFetcher } from "./activity-fetcher";
 import { GitHubQueryResult } from "./fetch-response";
+import { AppConfig } from "../../configs/app-config";
 
-// Constants
-const MAX_DISCUSSIONS = 15;
-const MAX_COMMENTS = 5;
-
-// GraphQL Query
 const DISCUSSION_QUERY = `
-    query GetDiscussionsAndComments($owner: String!, $name: String!, $discCount: Int!, $commCount: Int!) {
+    query GetDiscussionsAndComments(
+      $owner: String!,
+      $name: String!,
+      $discCount: Int!,
+      $commCount: Int!
+    ) {
       repository(owner: $owner, name: $name) {
         discussions(first: $discCount, orderBy: {field: CREATED_AT, direction: DESC}) {
           nodes {
             id title url createdAt author { login } bodyText
-            comments(last: $commCount, orderBy: {field: UPDATED_AT, direction: DESC}) {
-               nodes { id createdAt author { login } bodyText url discussion { title url } }
+            comments(last: $commCount) {
+               nodes {
+                 id createdAt author { login } bodyText url
+                 discussion { title url }
+               }
             }
           }
         }
@@ -27,8 +31,10 @@ const DISCUSSION_QUERY = `
 export class GithubDiscussionFetcher implements ISingleSourceActivityFetcher {
   private readonly graphqlWithAuth: typeof graphql;
 
-  constructor(githubPat: string) {
-    this.graphqlWithAuth = graphql.defaults({ headers: { authorization: `token ${githubPat}` } });
+  public constructor(private readonly config: AppConfig) {
+    this.graphqlWithAuth = graphql.defaults({
+      headers: { authorization: `token ${config.githubPat}` },
+    });
     console.log("GithubDiscussionFetcher initialized.");
   }
 
@@ -61,12 +67,13 @@ export class GithubDiscussionFetcher implements ISingleSourceActivityFetcher {
 
       if (discussion.comments?.nodes) {
         for (const comment of discussion.comments.nodes) {
+          const originalDiscussionTitle = discussion.title || "Original Discussion";
           if (new Date(comment.createdAt) > new Date(lastCommentTimestamp)) {
             activities.push({
               repo: repoFullName,
               sourceType: "discussion_comment",
               id: comment.id,
-              title: `Re: ${comment.discussion?.title || discussion.title || "Original Discussion"}`,
+              title: `Re: ${comment.discussion?.title || originalDiscussionTitle}`,
               url: comment.url,
               author: comment.author?.login || "Unknown",
               createdAt: comment.createdAt,
@@ -89,7 +96,7 @@ export class GithubDiscussionFetcher implements ISingleSourceActivityFetcher {
     const lastDiscussionTimestamp =
       repoLastProcessed.discussion?.lastTimestamp || new Date(0).toISOString();
     const lastCommentTimestamp =
-      repoLastProcessed.comment?.lastTimestamp || new Date(0).toISOString();
+      repoLastProcessed.discussion_comment?.lastTimestamp || new Date(0).toISOString();
 
     console.log(
       `Fetching Discussions/Comments for ${repoFullName} since D:${lastDiscussionTimestamp}, C:${lastCommentTimestamp}`
@@ -99,8 +106,8 @@ export class GithubDiscussionFetcher implements ISingleSourceActivityFetcher {
       const result = await this.graphqlWithAuth<GitHubQueryResult>(DISCUSSION_QUERY, {
         owner,
         name,
-        discCount: MAX_DISCUSSIONS,
-        commCount: MAX_COMMENTS,
+        discCount: this.config.maxItemsPerRun,
+        commCount: this.config.maxItemsPerRun,
       });
 
       return this.processDiscussionData(

@@ -1,12 +1,12 @@
-import fs, { WriteFileOptions, BufferEncoding } from "fs";
+import fs, { type WriteFileOptions } from "fs";
 import { IFileSystem } from "./file-system";
 
 export class NodeFileSystem implements IFileSystem {
-  existsSync(path: string | Buffer | URL): boolean {
+  public existsSync(path: string | Buffer | URL): boolean {
     return fs.existsSync(path);
   }
 
-  readFileSync(
+  public readFileSync(
     path: string | Buffer | URL,
     options?: { encoding?: BufferEncoding | null; flag?: string } | BufferEncoding | null
   ): string | Buffer {
@@ -18,7 +18,7 @@ export class NodeFileSystem implements IFileSystem {
     return fs.readFileSync(path, finalOptions);
   }
 
-  writeFileSync(
+  public writeFileSync(
     path: string | Buffer | URL,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions

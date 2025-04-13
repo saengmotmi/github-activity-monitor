@@ -2,14 +2,15 @@
   "name": "github-activity-monitor",
   "version": "1.0.0",
   "description": "GitHub Activity Monitor ",
-  "main": "script/index.cjs",
+  "main": "script/index.mjs",
   "type": "module",
   "files": [
     "script"
   ],
   "scripts": {
     "build": "tsup --config dev-configs/tsup.config.ts",
-    "dev": "tsup --watch --config dev-configs/tsup.config.ts --onSuccess \"node script/index.cjs\"",
+    "dev": "tsx watch src/index.ts",
+    "start": "node script/index.mjs",
     "test": "vitest run -c dev-configs/vitest.config.ts",
     "test:watch": "vitest -c dev-configs/vitest.config.ts",
     "lint": "eslint --config dev-configs/eslint.config.js --ext .ts,.tsx src/",
@@ -37,6 +38,7 @@
     "lint-staged": "^15.5.0",
     "prettier": "^3.2.5",
     "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "vitest": "^3.1.1"
   },

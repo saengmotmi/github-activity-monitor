@@ -17,7 +17,7 @@ export class MockHttpClient implements IHttpClient {
    * @param url The URL to match.
    * @param response The response data to return.
    */
-  setResponse(
+  public setResponse(
     method: "GET" | "POST" | "PUT" | "DELETE",
     url: string | URL,
     response: unknown
@@ -32,7 +32,7 @@ export class MockHttpClient implements IHttpClient {
    * @param url The URL to match.
    * @returns The recorded request details or undefined if not found.
    */
-  getRequest(
+  public getRequest(
     method: "GET" | "POST" | "PUT" | "DELETE",
     url: string | URL
   ): { url: string | URL; options?: HttpClientOptions; body?: unknown } | undefined {
@@ -40,7 +40,7 @@ export class MockHttpClient implements IHttpClient {
     return this.requests.get(key);
   }
 
-  private async handleRequest<TResponse, TRequest = unknown>(
+  public async handleRequest<TResponse, TRequest = unknown>(
     method: "GET" | "POST" | "PUT" | "DELETE",
     url: string | URL,
     options?: HttpClientOptions,
@@ -55,11 +55,11 @@ export class MockHttpClient implements IHttpClient {
     return Promise.reject(new Error(`MockHttpClient: No response configured for ${method} ${url}`));
   }
 
-  async get<TResponse>(url: string | URL, options?: HttpClientOptions): Promise<TResponse> {
+  public async get<TResponse>(url: string | URL, options?: HttpClientOptions): Promise<TResponse> {
     return this.handleRequest("GET", url, options);
   }
 
-  async post<TResponse, TRequest = unknown>(
+  public async post<TResponse, TRequest = unknown>(
     url: string | URL,
     body?: TRequest,
     options?: HttpClientOptions
@@ -67,7 +67,7 @@ export class MockHttpClient implements IHttpClient {
     return this.handleRequest("POST", url, options, body);
   }
 
-  async put<TResponse, TRequest = unknown>(
+  public async put<TResponse, TRequest = unknown>(
     url: string | URL,
     body?: TRequest,
     options?: HttpClientOptions
@@ -75,7 +75,10 @@ export class MockHttpClient implements IHttpClient {
     return this.handleRequest("PUT", url, options, body);
   }
 
-  async delete<TResponse>(url: string | URL, options?: HttpClientOptions): Promise<TResponse> {
+  public async delete<TResponse>(
+    url: string | URL,
+    options?: HttpClientOptions
+  ): Promise<TResponse> {
     return this.handleRequest("DELETE", url, options);
   }
 }

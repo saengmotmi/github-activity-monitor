@@ -1,7 +1,7 @@
 {
   // ESLint 설정 파일 경로 지정
   "eslint.options": {
-    "configFile": "dev-configs/eslint.config.js"
+    "overrideConfigFile": "dev-configs/eslint.config.js"
   },
   // Prettier 설정 파일 경로 지정
   "prettier.configPath": "dev-configs/prettier.config.mjs",

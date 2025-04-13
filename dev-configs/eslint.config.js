@@ -44,6 +44,8 @@ export default [
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-explicit-any": "warn",
+      // 클래스의 접근 제어자 강제
+      "@typescript-eslint/explicit-member-accessibility": "error",
     },
   },
   // 테스트 파일 설정
