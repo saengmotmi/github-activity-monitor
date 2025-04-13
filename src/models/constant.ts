@@ -21,5 +21,6 @@ export const NOTIFIER_PROVIDERS = {
 
 export const DEFAULT_STATE_FILE_PATH = "state.json";
 export const DEFAULT_MAX_ITEMS_PER_RUN = 5;
-export const DEFAULT_SUMMARIZATION_ENABLED = true;
+export const DEFAULT_SUMMARIZATION_ENABLED = false;
 export const DEFAULT_LLM_PROVIDER = LLM_PROVIDERS.NONE;
+export const DEFAULT_LLM_MODEL_NAME = "";

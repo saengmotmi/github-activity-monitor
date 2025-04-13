@@ -86,9 +86,6 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
-
-
-
 coverage/
 dist/
 !dist/index.cjs

@@ -1,13 +1,14 @@
 import dotenv from "dotenv";
 import { LLMProviderType } from "../models/config";
 import {
+  DEFAULT_LLM_MODEL_NAME,
   DEFAULT_LLM_PROVIDER,
   DEFAULT_MAX_ITEMS_PER_RUN,
   DEFAULT_STATE_FILE_PATH,
   DEFAULT_SUMMARIZATION_ENABLED,
   LLM_PROVIDERS,
 } from "../models/constant";
-import { config as MonitorConfig } from "../monitor.config";
+import { config as MonitorConfig } from "../../monitor.config";
 import { AppConfig, AppSecrets, AppVariables } from "./app-config";
 
 type LLMProviderValidation = {
@@ -55,7 +56,7 @@ function getVariablesFromMonitorConfig(): AppVariables {
     maxItemsPerRun: MonitorConfig.maxItemsPerRun ?? DEFAULT_MAX_ITEMS_PER_RUN,
     summarizationEnabled: MonitorConfig.summarizationEnabled ?? DEFAULT_SUMMARIZATION_ENABLED,
     llmProvider: MonitorConfig.llmProvider ?? DEFAULT_LLM_PROVIDER,
-    llmModelName: MonitorConfig.llmModelName,
+    llmModelName: MonitorConfig.llmModelName ?? DEFAULT_LLM_MODEL_NAME,
   };
 }
 
@@ -66,6 +67,12 @@ function validateAppConfig(config: AppConfig): void {
 
   if (config.repoConfigs.length === 0)
     throw new Error("Missing or invalid required config: RepoConfigs");
+
+  if (config.repoConfigs.some((rc) => rc.name === ""))
+    throw new Error("Missing or invalid required config: RepoConfigs.name");
+
+  if (config.repoConfigs.some((rc) => rc.monitorTypes.length === 0))
+    throw new Error("Missing or invalid required config: RepoConfigs.monitorTypes");
 
   if (!config.discordWebhookUrl && !config.slackWebhookUrl) {
     console.warn(

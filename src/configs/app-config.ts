@@ -22,11 +22,11 @@ export type AppVariables = {
   stateFilePath: string;
   /** Maximum Items Per Run @default 5 */
   maxItemsPerRun: number;
-  /** Summarization Enabled @default true */
+  /** Summarization Enabled @default false */
   summarizationEnabled: boolean;
   /** LLM Provider, if none, summarization will be disabled @see LLMProviderType @default "none" */
   llmProvider: LLMProviderType;
-  /** LLM Model Name */
+  /** LLM Model Name @default "" */
   llmModelName?: string;
 };
 
