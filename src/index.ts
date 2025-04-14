@@ -8,7 +8,6 @@ async function bootstrap() {
     const config = loadAndValidateConfig();
     const monitor = setupApplication(config);
 
-    // 3. 애플리케이션 실행
     await monitor.run();
 
     console.log("Application run finished successfully.");
