@@ -16,10 +16,10 @@ export const config: AppVariables = {
    * }
    */
   repoConfigs: [
-    {
-      name: "vercel/next.js",
-      monitorTypes: ["discussion", "discussion_comment"],
-    },
+    // {
+    //   name: "vercel/next.js",
+    //   monitorTypes: ["discussion", "discussion_comment"],
+    // },
     {
       name: "toss/frontend-fundamentals",
       monitorTypes: ["discussion", "discussion_comment"],
