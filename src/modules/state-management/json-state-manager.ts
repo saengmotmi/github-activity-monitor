@@ -1,4 +1,3 @@
-import { ActivityItem } from "../../models/activity";
 import { LastProcessedState } from "../../models/state";
 import { IFileSystem } from "../persistence/file-system";
 import { IStateManager } from "./state-manager";
@@ -41,38 +40,5 @@ export class JsonStateManager implements IStateManager {
     } catch (error) {
       console.error(`Error saving state file to ${this.filePath}:`, error);
     }
-  }
-
-  public calculateNextState(
-    currentProcessedState: LastProcessedState,
-    fetchedActivities: ActivityItem[]
-  ): LastProcessedState {
-    const nextProcessedState: LastProcessedState = JSON.parse(
-      JSON.stringify(currentProcessedState)
-    );
-
-    for (const activity of fetchedActivities) {
-      const repo = activity.repo;
-      const sourceType = activity.sourceType;
-
-      if (!nextProcessedState[repo]) {
-        nextProcessedState[repo] = {};
-      }
-
-      const currentRepoProcessed = nextProcessedState[repo];
-
-      if (!currentRepoProcessed[sourceType]) {
-        currentRepoProcessed[sourceType] = { lastTimestamp: new Date(0).toISOString() };
-      }
-
-      const currentSourceProcessed = currentRepoProcessed[sourceType];
-      const activityDate = new Date(activity.createdAt);
-
-      if (activityDate > new Date(currentSourceProcessed.lastTimestamp)) {
-        currentSourceProcessed.lastTimestamp = activity.createdAt;
-      }
-    }
-
-    return nextProcessedState;
   }
 }
