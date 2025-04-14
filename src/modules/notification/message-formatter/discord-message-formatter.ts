@@ -1,138 +1,94 @@
-import { ActivityItem } from "../../../models/activity";
-import { hasSummary } from "../has-summary";
+import { ActivityItem, hasSummary } from "../../../models/activity";
 import { DiscordEmbedTemplate, defaultDiscordEmbedTemplate } from "./discord-embed-template";
 import { IMessageFormatter } from "./message-formatter";
 
 export type DiscordPayload = {
+  content?: string;
   embeds: {
-    title: string;
-    color: number;
-    fields: {
-      name: string;
-      value: string;
-      inline: boolean;
+    title?: string;
+    description?: string;
+    url?: string;
+    color?: number;
+    footer?: {
+      text: string;
+      icon_url?: string;
     };
+    timestamp?: string;
   }[];
 };
 
 export class DiscordMessageFormatter implements IMessageFormatter<DiscordPayload> {
   private readonly template: DiscordEmbedTemplate;
-  private readonly maxFields = 25; // Discord API Embed 필드 최대 개수
 
-  /**
-   * 생성자에서 Discord Embed 템플릿 객체를 주입받습니다.
-   * 만약 템플릿을 외부에서 주입하지 않고 항상 기본 템플릿을 사용한다면,
-   * 생성자 인자를 없애고 내부에서 `this.template = defaultDiscordEmbedTemplate;` 로 설정할 수도 있습니다.
-   * 여기서는 유연성을 위해 주입받는 방식을 사용합니다.
-   * @param template 사용할 Discord Embed 템플릿 객체
-   */
-  constructor(template: DiscordEmbedTemplate = defaultDiscordEmbedTemplate) {
+  public constructor(template: DiscordEmbedTemplate = defaultDiscordEmbedTemplate) {
     this.template = template;
   }
 
   /**
-   * ActivityItem 배열을 받아 Discord Embed Payload 형식으로 변환합니다.
-   * 주입된 템플릿을 사용하여 메시지 구조와 내용을 생성합니다.
+   * 단일 ActivityItem을 받아 개별 Discord Embed Payload 형식으로 변환합니다.
+   * @param item 포맷할 활동 아이템
+   * @returns 개별 메시지용 DiscordPayload 객체, 생성할 내용이 없으면 null (거의 발생하지 않음)
    */
-  format(
-    itemsToSend: ActivityItem[],
-    totalNewCount: number,
-    maxItems: number
-  ): DiscordPayload | null {
-    if (itemsToSend.length === 0) return null;
+  public formatSingleItem(item: ActivityItem): DiscordPayload | null {
+    const descriptionParts: string[] = [
+      // 1. 제목 (볼드 + 링크)
+      `### **[${item.title}](${item.url})**`,
+      // 2. 레포지토리 정보
+      `Repository: ${item.repo}`,
+    ];
 
-    const actualItems = itemsToSend.slice(0, this.maxFields);
-    const isTruncated = itemsToSend.length > this.maxFields;
-    const hasMoreItems = totalNewCount > maxItems;
+    // 3. 요약 정보 (있을 경우)
+    if (hasSummary(item)) {
+      // 요약 길이 제한 적용
+      const summaryPreview =
+        item.summary.length > 500 // 개별 메시지이므로 요약 길이를 좀 더 허용
+          ? item.summary.substring(0, 497) + "..."
+          : item.summary;
+      descriptionParts.push(`Summary: ${summaryPreview}`);
+    }
 
-    const embedTitle = this.buildEmbedTitle(actualItems.length);
-    const embedFields = this.buildEmbedFields(actualItems);
-    const embedFooter = this.buildEmbedFooter(hasMoreItems, isTruncated, totalNewCount, maxItems);
+    // 최종 description 문자열 생성 (줄바꿈으로 연결)
+    const description = descriptionParts.join("\n");
 
-    const embed: DiscordPayload = {
-      // 필요시 더 구체적인 타입 사용
-      title: embedTitle,
+    // description 길이 제한 (4096자) 확인
+    const maxDescLength = 4096;
+    const truncatedDescription =
+      description.length > maxDescLength
+        ? description.substring(0, maxDescLength - 3) + "..."
+        : description;
+
+    // Embed 객체 생성
+    const embed = {
+      description: truncatedDescription, // 여기에 주요 정보 통합
       color: this.template.color,
-      fields: embedFields,
+      timestamp: this.template.timestamp_enabled ? item.createdAt : undefined, // 활동 생성 시간 사용 (더 의미 있음)
     };
-
-    if (embedFooter) {
-      embed.footer = embedFooter;
-    }
-
-    if (this.template.timestamp_enabled) {
-      embed.timestamp = new Date().toISOString();
-    }
-
-    // 푸터 내용이 없고 타임스탬프도 비활성화된 경우 footer 객체 제거
-    if (!embed.footer?.text && !embed.timestamp) {
-      delete embed.footer;
-    }
 
     return { embeds: [embed] };
   }
 
   /**
-   * Embed 제목 문자열을 생성합니다.
-   * @param count 표시될 실제 아이템 수
-   * @returns 포맷된 제목 문자열
+   * IMessageFormatter 인터페이스 구현을 위한 메서드.
+   * 이 클래스는 이제 단일 아이템 포맷팅에 초점을 맞추므로,
+   * 이 메서드는 내부적으로 formatSingleItem을 사용하거나,
+   * Notifier에서 직접 formatSingleItem을 호출하도록 변경할 수 있습니다.
+   * 여기서는 Notifier에서 직접 formatSingleItem을 호출한다고 가정하고,
+   * 이 메서드는 사용되지 않음을 명시하거나 간단한 구현을 남깁니다.
    */
-  private buildEmbedTitle(count: number): string {
-    return this.template.title.replace("{count}", String(count));
-  }
-
-  /**
-   * ActivityItem 배열을 Embed Field 배열로 변환합니다.
-   * @param items 변환할 ActivityItem 배열 (최대 필드 수 적용 후)
-   * @returns EmbedField 객체 배열
-   */
-  private buildEmbedFields(items: ActivityItem[]) {
-    return items.map((item) => {
-      const summarySection = hasSummary(item) ? `📝 ${item.summary}\n` : "";
-      const fieldName = this.template.fields.name
-        .replace("{repo}", item.repo)
-        .replace("{title}", item.title);
-      const fieldValue = this.template.fields.value
-        .replace("{summarySection}", summarySection)
-        .replace("{author}", item.author)
-        .replace("{sourceType}", item.sourceType);
-
-      return {
-        name: fieldName,
-        value: fieldValue,
-        inline: this.template.fields.inline,
-      };
-    });
-  }
-
-  /**
-   * 조건에 따라 Embed Footer 객체를 생성합니다.
-   * @param hasMoreItems 전체 아이템 수가 최대 표시 수보다 많은지 여부
-   * @param isTruncated 메시지 필드 수가 Discord 제한을 초과하는지 여부
-   * @param totalNewCount 필터링 전 전체 새 아이템 수
-   * @param maxItems 설정된 최대 표시 아이템 수
-   * @returns 생성된 EmbedFooter 객체 또는 내용이 없으면 null
-   */
-  private buildEmbedFooter(
-    hasMoreItems: boolean,
-    isTruncated: boolean,
-    totalNewCount: number,
-    maxItems: number
-  ) {
-    const footerParts: string[] = [];
-    const remainingCount = Math.max(0, totalNewCount - maxItems);
-
-    if (hasMoreItems && remainingCount > 0) {
-      footerParts.push(
-        this.template.footer_exceeding_items.replace("{remaining_count}", String(remainingCount))
-      );
+  public format(
+    itemsToSend: ActivityItem[],
+    totalNewCount: number, // 이제 사용되지 않음
+    maxItems: number // 이제 사용되지 않음
+  ): DiscordPayload | null {
+    // 이 메서드는 이제 직접 사용되지 않습니다.
+    // Notifier에서 formatSingleItem을 각 아이템에 대해 호출해야 합니다.
+    console.warn(
+      "DiscordMessageFormatter.format() is deprecated. Use formatSingleItem() for each item."
+    );
+    // 첫 번째 아이템만 포맷하여 반환하거나 null을 반환할 수 있습니다.
+    if (itemsToSend.length > 0) {
+      return this.formatSingleItem(itemsToSend[0]);
     }
-    if (isTruncated) {
-      footerParts.push(this.template.footer_truncation);
-    }
-
-    const footerText = footerParts.join(" ").trim();
-
-    return footerText ? { text: footerText } : null;
+    return null;
   }
 }
