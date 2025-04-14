@@ -24,10 +24,10 @@ export const config: AppVariables = {
       name: "toss/frontend-fundamentals",
       monitorTypes: ["discussion", "discussion_comment"],
     },
-    {
-      name: "GHooN99/blog-v1",
-      monitorTypes: ["discussion", "discussion_comment"],
-    },
+    // {
+    //   name: "GHooN99/blog-v1",
+    //   monitorTypes: ["discussion", "discussion_comment"],
+    // },
   ],
 
   /**
@@ -48,7 +48,7 @@ export const config: AppVariables = {
    * If set to `true`, requires configuring `llmProvider` and `llmModelName`.
    * @default false
    */
-  summarizationEnabled: false,
+  summarizationEnabled: true,
 
   /**
    * The Large Language Model (LLM) provider to use for summarization.
@@ -56,7 +56,7 @@ export const config: AppVariables = {
    * Supported providers: "gemini", "openai" // (Add other supported providers as needed)
    * @default "none"
    */
-  llmProvider: "none", // Or "openai", etc.
+  llmProvider: "gemini", // Or "openai", etc.
 
   /**
    * The specific model name from the selected LLM provider to use for summarization.
@@ -64,5 +64,5 @@ export const config: AppVariables = {
    * @example "gemini-1.5-flash-latest", "gpt-4o"
    * @default ""
    */
-  llmModelName: "", // Or the specific model you intend to use
+  llmModelName: "gemini-2.0-flash-lite", // Or the specific model you intend to use
 };
