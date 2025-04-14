@@ -1,26 +1,18 @@
 {
   "toss/frontend-fundamentals": {
     "discussion": {
-      "lastTimestamp": "2025-04-11T06:46:57Z"
+      "lastTimestamp": "2025-04-14T12:25:20Z"
     },
     "discussion_comment": {
-      "lastTimestamp": "2025-04-10T01:41:17Z"
-    }
-  },
-  "vercel/next.js": {
-    "discussion": {
-      "lastTimestamp": "2025-04-13T03:38:11Z"
-    },
-    "discussion_comment": {
-      "lastTimestamp": "2025-04-13T03:41:09Z"
+      "lastTimestamp": "2025-04-14T12:12:49Z"
     }
   },
   "GHooN99/blog-v1": {
     "discussion": {
-      "lastTimestamp": "2025-04-13T06:07:50Z"
+      "lastTimestamp": "2025-04-14T07:51:18Z"
     },
     "discussion_comment": {
-      "lastTimestamp": "2025-04-13T06:07:04Z"
+      "lastTimestamp": "2025-04-14T08:30:28Z"
     }
   }
 }
