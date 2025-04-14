@@ -11,7 +11,6 @@ interface ActivityMonitorDependencies {
   activityProcessor: IActivityProcessor;
   stateProcessor: IStateProcessor;
   notifier: INotifier;
-  config: AppConfig;
 }
 
 export class ActivityMonitor {
@@ -19,7 +18,7 @@ export class ActivityMonitor {
 
   public async run(): Promise<void> {
     console.log("ActivityMonitor run starting...");
-    const { stateManager, fetcher, activityProcessor, stateProcessor, notifier, config } =
+    const { stateManager, fetcher, activityProcessor, stateProcessor, notifier } =
       this.dependencies;
 
     try {
@@ -36,11 +35,7 @@ export class ActivityMonitor {
       const itemsToNotify = await activityProcessor.processForNotification(fetchedActivities);
       console.log(`Prepared ${itemsToNotify.length} items for notification.`);
 
-      await notifier.sendNotification(
-        itemsToNotify,
-        fetchedActivities.length,
-        config.maxItemsPerRun
-      );
+      await notifier.sendNotification(itemsToNotify);
 
       const nextState = stateProcessor.calculateNextState(currentState, fetchedActivities);
       stateManager.saveState(nextState);

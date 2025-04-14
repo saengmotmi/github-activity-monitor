@@ -11,6 +11,7 @@ import { DiscordMessageFormatter } from "./modules/notification/message-formatte
 import { IActivitySummarizer } from "./modules/summarization/summarizer";
 import { ActivityProcessor } from "./core/activity-processor";
 import { StateProcessor } from "./core/state-processor";
+import { GeminiSummarizer } from "./modules/summarization/gemini-summarizer";
 
 function createActivityFetcher(config: AppConfig): GithubActivityAggregator {
   const discussionFetcher = new GithubDiscussionFetcher(config);
@@ -37,7 +38,7 @@ function createNotifier(config: AppConfig): DiscordNotifier {
 
 function createSummarizer(config: AppConfig): IActivitySummarizer {
   // TODO: Dynamic Summarizer Instance via config
-  return new NoopSummarizer();
+  return new GeminiSummarizer(config);
 }
 
 export function setupApplication(config: AppConfig): ActivityMonitor {
@@ -54,7 +55,6 @@ export function setupApplication(config: AppConfig): ActivityMonitor {
   const stateProcessor = new StateProcessor();
 
   return new ActivityMonitor({
-    config,
     fetcher,
     stateManager,
     activityProcessor,
