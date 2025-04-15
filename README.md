@@ -67,6 +67,16 @@ SLACK_WEBHOOK_URL=your_slack_webhook_url
 
 **Note:** At minimum, you need to provide `GITHUB_PAT` and either `DISCORD_WEBHOOK_URL` or `SLACK_WEBHOOK_URL`.
 
+**Important for GitHub PAT**: When creating your GitHub Personal Access Token, make sure to enable read permissions for all repository resources, especially:
+
+- Discussions (read)
+- Pull Requests (read)
+- Issues (read)
+- Contents (read)
+- Metadata (read)
+
+Without these permissions, the monitor won't be able to access the required information from the repositories.
+
 ### Monitor Configuration
 
 Edit the `monitor.config.ts` file to customize your monitoring settings:

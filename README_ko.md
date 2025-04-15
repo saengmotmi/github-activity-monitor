@@ -67,6 +67,16 @@ SLACK_WEBHOOK_URL=your_slack_webhook_url
 
 **참고:** 최소한 `GITHUB_PAT`와 `DISCORD_WEBHOOK_URL` 또는 `SLACK_WEBHOOK_URL` 중 하나를 제공해야 합니다.
 
+**GitHub PAT 생성 시 중요 사항**: GitHub 개인 액세스 토큰(PAT)을 생성할 때 모든 저장소 리소스에 대한 읽기 권한을 활성화해야 합니다. 특히 다음 권한이 필요합니다:
+
+- 토론(Discussions) (읽기)
+- 풀 리퀘스트(Pull Requests) (읽기)
+- 이슈(Issues) (읽기)
+- 콘텐츠(Contents) (읽기)
+- 메타데이터(Metadata) (읽기)
+
+이러한 권한이 없으면 모니터가 저장소에서 필요한 정보에 접근할 수 없습니다.
+
 ### 모니터 구성
 
 모니터링 설정을 사용자 정의하려면 `monitor.config.ts` 파일을 편집하세요:
