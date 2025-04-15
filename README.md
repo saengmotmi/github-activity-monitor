@@ -1,30 +1,164 @@
 # GitHub Activity Monitor
 
-## 개발 환경
+A powerful tool to track and monitor activities in public GitHub repositories, with optional AI-powered summarization and notification capabilities.
 
-이 프로젝트는 다음과 같은 도구를 사용합니다:
+_Read this in [Korean (한국어)](./README_ko.md)_
 
-- TypeScript: 타입 안전한 JavaScript 개발
-- tsup: TypeScript 빌드 및 번들링
-- Vitest: 유닛 테스트
+## Overview
 
-## 스크립트
+GitHub Activity Monitor lets you track meaningful discussions, PRs, issues, and comments from any public GitHub repository, even those you don't own. It solves the problem of not having webhook access to repositories you're interested in by directly fetching and monitoring activities.
+
+Key features:
+
+- Monitor discussions, issues, pull requests, and comments from public repositories
+- AI-powered summarization using Gemini, OpenAI, or other LLM providers
+- Send notifications to Discord or Slack
+- Configurable tracking with flexible repository monitoring options
+
+## Installation
+
+There are two ways to use this tool:
+
+### Method 1: Fork and Configure (Recommended)
+
+1. Fork this repository to your GitHub account
+2. Configure your `.env` and `monitor.config.ts` files
+3. Set up GitHub Actions workflow (see below)
+
+### Method 2: Local Installation
 
 ```bash
-# 의존성 설치
-npm install
+# Clone the repository
+git clone https://github.com/yourusername/github-activity-monitor.git
+cd github-activity-monitor
 
-# 개발 모드 실행 (파일 변경 감지)
-npm run dev
+# Install dependencies using pnpm
+pnpm install
 
-# 프로덕션 빌드
-npm run build
-
-# 테스트 실행
-npm run test
-
-# 테스트 감시 모드
-npm run test:watch
+# Set up environment variables (copy and edit)
+cp .env.example .env
 ```
 
-Testing pre-commit hook.
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```
+GITHUB_PAT=your_github_pat
+OPENAI_API_KEY=your_openai_api_key
+GOOGLE_API_KEY=your_google_api_key
+CLAUDE_API_KEY=your_claude_api_key
+DISCORD_WEBHOOK_URL=your_discord_webhook_url
+SLACK_WEBHOOK_URL=your_slack_webhook_url
+```
+
+**Note:** At minimum, you need to provide `GITHUB_PAT` and either `DISCORD_WEBHOOK_URL` or `SLACK_WEBHOOK_URL`.
+
+### Monitor Configuration
+
+Edit the `monitor.config.ts` file to customize your monitoring settings:
+
+```typescript
+export const config = {
+  repoConfigs: [
+    {
+      name: "owner/repo",
+      monitorTypes: ["discussion", "discussion_comment"],
+    },
+    // Add more repositories as needed
+  ],
+  stateFilePath: "state.json",
+  maxItemsPerRun: 5,
+  summarizationEnabled: true,
+  llmProvider: "gemini", // or "openai", "claude", "none"
+  llmModelName: "gemini-2.0-flash-lite", // or your preferred model
+};
+```
+
+## Usage
+
+### Using GitHub Actions (Recommended)
+
+This repository includes a GitHub Actions workflow that automatically runs the monitor on a schedule.
+
+1. Fork this repository to your GitHub account
+2. Go to your forked repository's Settings > Secrets and variables > Actions
+3. Add the required environment variables as repository secrets:
+   - `GITHUB_PAT`
+   - `DISCORD_WEBHOOK_URL` or `SLACK_WEBHOOK_URL`
+   - Optional: `GOOGLE_API_KEY`, `OPENAI_API_KEY`, or `CLAUDE_API_KEY` (for summarization)
+4. Edit the `.github/workflows/monitor.yml` file to customize the schedule
+5. Enable GitHub Actions in your repository settings
+
+The monitor will now run automatically according to the schedule you defined.
+
+### Running Locally
+
+```bash
+# Run in development mode (with file watching)
+pnpm dev
+
+# Build the project
+pnpm build
+
+# Run in production mode
+pnpm start
+```
+
+You can also set up a cron job or scheduled task to run the monitor periodically:
+
+```bash
+# Example cron job (runs every hour)
+0 * * * * cd /path/to/github-activity-monitor && pnpm start > /path/to/logfile.log 2>&1
+```
+
+## Development
+
+### Project Structure
+
+```
+src/
+├── configs/            # Configuration handling
+├── core/               # Core application logic
+├── models/             # Data models and types
+└── modules/
+    ├── activity-fetching/    # GitHub API interaction
+    ├── http-client/          # HTTP client abstraction
+    ├── notification/         # Discord/Slack notification
+    ├── persistence/          # File system operations
+    ├── state-management/     # Tracking state between runs
+    └── summarization/        # AI summarization logic
+```
+
+### Key Scripts
+
+```bash
+# Run tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Lint code
+pnpm lint
+
+# Fix linting issues
+pnpm lint:fix
+
+# Format code
+pnpm format
+```
+
+### Requirements
+
+- Node.js >= 20.0.0
+- pnpm >= 10.0.0 (recommended package manager)
+- A valid GitHub Personal Access Token
+- (Optional) API key for OpenAI, Google (Gemini), or Anthropic (Claude)
+- Discord or Slack webhook URL for notifications
+
+## Contributions
+
+Contributions are welcome! Please feel free to submit a Pull Request.
