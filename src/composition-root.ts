@@ -2,17 +2,20 @@ import { AppConfig } from "./configs/app-config";
 import { ActivityMonitor } from "./core/activity-monitor";
 import { ActivityProcessor } from "./core/activity-processor";
 import { StateProcessor } from "./core/state-processor";
+import { IActivityFetcher } from "./modules/activity-fetching/activity-fetcher";
 import { GithubActivityAggregator } from "./modules/activity-fetching/github-activity-aggregator";
 import { GithubDiscussionFetcher } from "./modules/activity-fetching/github-discussion-fetcher";
 import { KyHttpClient } from "./modules/http-client/ky-http-client";
 import { DiscordNotifier } from "./modules/notification/discord-notifier";
 import { DiscordMessageFormatter } from "./modules/notification/message-formatter/discord-message-formatter";
+import { INotifier } from "./modules/notification/notifier";
 import { NodeFileSystem } from "./modules/persistence/node-file-system";
 import { JsonStateManager } from "./modules/state-management/json-state-manager";
+import { IStateManager } from "./modules/state-management/state-manager";
 import { GeminiSummarizer } from "./modules/summarization/gemini-summarizer";
 import { IActivitySummarizer } from "./modules/summarization/summarizer";
 
-function createActivityFetcher(config: AppConfig): GithubActivityAggregator {
+function createActivityFetcher(config: AppConfig): IActivityFetcher {
   const discussionFetcher = new GithubDiscussionFetcher(config);
   return new GithubActivityAggregator(
     {
@@ -22,16 +25,17 @@ function createActivityFetcher(config: AppConfig): GithubActivityAggregator {
   );
 }
 
-function createStateManager(config: AppConfig): JsonStateManager {
+function createStateManager(config: AppConfig): IStateManager {
   const fileSystem = new NodeFileSystem();
   return new JsonStateManager(config.stateFilePath, fileSystem);
 }
 
-function createNotifier(config: AppConfig): DiscordNotifier {
+function createNotifier(config: AppConfig): INotifier {
   const httpClient = new KyHttpClient();
 
   // TODO: Dynamic Notifier Instance via config
   const discordFormatter = new DiscordMessageFormatter();
+
   return new DiscordNotifier(config.discordWebhookUrl!, httpClient, discordFormatter);
 }
 

@@ -22,7 +22,7 @@ export class DiscordMessageFormatter implements IMessageFormatter<DiscordPayload
   public formatSingleItem(item: ActivityItem): DiscordPayload | null {
     const descriptionParts: string[] = [
       `### **[${item.title}](${item.url})**`,
-      `Repository: ${item.repo}`,
+      `Repository: \`${item.repo}\``,
     ];
 
     // 3. 요약 정보 (있을 경우)

@@ -8,7 +8,7 @@ export class GeminiSummarizer implements IActivitySummarizer {
   private readonly client: GoogleGenerativeAI;
   private readonly modelName: string;
 
-  public constructor(private readonly config: AppConfig) {
+  public constructor(config: AppConfig) {
     if (!config.geminiApiKey) {
       throw new Error("Gemini API key is not configured.");
     }
@@ -27,6 +27,7 @@ export class GeminiSummarizer implements IActivitySummarizer {
     const summaryPromises = activities.map(async (activity) => {
       if (activity.body && !activity.summary) {
         const prompt = `${GEMINI_SUMMARIZATION_PROMPT} ${activity.body}`;
+
         try {
           const result = await model.generateContent(prompt);
           const response = result.response;
