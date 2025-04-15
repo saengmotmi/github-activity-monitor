@@ -4,10 +4,10 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/*.test.ts"],
+    reporters: ["verbose"],
     coverage: {
       reporter: ["text", "json", "html"],
       provider: "v8",
     },
-    setupFiles: ["./vitest.setup.ts"],
   },
 });
