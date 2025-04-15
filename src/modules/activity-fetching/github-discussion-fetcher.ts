@@ -1,26 +1,45 @@
 import { graphql, GraphqlResponseError } from "@octokit/graphql";
+import { AppConfig } from "../../configs/app-config";
 import { ActivityItem, ActivitySourceType } from "../../models/activity";
 import { RepositoryLastProcessed } from "../../models/state";
 import { ISingleSourceActivityFetcher } from "./activity-fetcher";
-import { GitHubQueryResult } from "./fetch-response";
-import { AppConfig } from "../../configs/app-config";
+import { GitHubCommentsOnlyResult, GitHubDiscussionsOnlyResult } from "./fetch-response";
 
-const DISCUSSION_QUERY = `
-    query GetDiscussionsAndComments(
+// 토론만 가져오는 쿼리
+const DISCUSSIONS_QUERY = `
+    query GetDiscussions(
       $owner: String!,
       $name: String!,
-      $discCount: Int!,
-      $commCount: Int!
+      $discCount: Int!
     ) {
       repository(owner: $owner, name: $name) {
         discussions(first: $discCount, orderBy: {field: CREATED_AT, direction: DESC}) {
           nodes {
             id title url createdAt author { login } bodyText
-            comments(last: $commCount) {
-               nodes {
-                 id createdAt author { login } bodyText url
-                 discussion { title url }
-               }
+          }
+        }
+      }
+    }
+`;
+
+// 댓글만 가져오는 쿼리
+const DISCUSSION_COMMENTS_QUERY = `
+    query GetDiscussionComments(
+      $owner: String!,
+      $name: String!,
+      $commCount: Int!
+    ) {
+      repository(owner: $owner, name: $name) {
+        discussions(first: 30) {
+          nodes {
+            id
+            title
+            url
+            comments(first: $commCount) {
+              nodes {
+                id createdAt author { login } bodyText url
+                discussion { title url }
+              }
             }
           }
         }
@@ -42,11 +61,10 @@ export class GithubDiscussionFetcher implements ISingleSourceActivityFetcher {
     return ["discussion", "discussion_comment"];
   }
 
-  private processDiscussionData(
+  private processDiscussionsData(
     repoFullName: string,
-    repositoryData: GitHubQueryResult["repository"],
-    lastDiscussionTimestamp: string,
-    lastCommentTimestamp: string
+    repositoryData: GitHubDiscussionsOnlyResult["repository"],
+    lastDiscussionTimestamp: string
   ): ActivityItem[] {
     const activities: ActivityItem[] = [];
     if (!repositoryData?.discussions?.nodes) return activities;
@@ -64,26 +82,82 @@ export class GithubDiscussionFetcher implements ISingleSourceActivityFetcher {
           body: discussion.bodyText || "",
         });
       }
+    }
+    return activities;
+  }
 
-      if (discussion.comments?.nodes) {
-        for (const comment of discussion.comments.nodes) {
-          const originalDiscussionTitle = discussion.title || "Original Discussion";
-          if (new Date(comment.createdAt) > new Date(lastCommentTimestamp)) {
-            activities.push({
-              repo: repoFullName,
-              sourceType: "discussion_comment",
-              id: comment.id,
-              title: `💬 새 댓글 - 원문 [${comment.discussion?.title || originalDiscussionTitle}]`,
-              url: comment.url,
-              author: comment.author?.login || "Unknown",
-              createdAt: comment.createdAt,
-              body: comment.bodyText || "",
-            });
-          }
+  private processCommentsData(
+    repoFullName: string,
+    repositoryData: GitHubCommentsOnlyResult["repository"],
+    lastCommentTimestamp: string
+  ): ActivityItem[] {
+    const activities: ActivityItem[] = [];
+    if (!repositoryData?.discussions?.nodes) return activities;
+
+    for (const discussion of repositoryData.discussions.nodes) {
+      if (!discussion.comments?.nodes) continue;
+
+      for (const comment of discussion.comments.nodes) {
+        if (new Date(comment.createdAt) > new Date(lastCommentTimestamp)) {
+          activities.push({
+            repo: repoFullName,
+            sourceType: "discussion_comment",
+            id: comment.id,
+            title: `💬 새 댓글 - 원문 [${comment.discussion?.title || discussion.title}]`,
+            url: comment.url,
+            author: comment.author?.login || "Unknown",
+            createdAt: comment.createdAt,
+            body: comment.bodyText || "",
+          });
         }
       }
     }
     return activities;
+  }
+
+  private async fetchDiscussions(
+    owner: string,
+    name: string,
+    lastDiscussionTimestamp: string
+  ): Promise<ActivityItem[]> {
+    try {
+      const result = await this.graphqlWithAuth<GitHubDiscussionsOnlyResult>(DISCUSSIONS_QUERY, {
+        owner,
+        name,
+        discCount: this.config.maxItemsPerRun,
+      });
+
+      return this.processDiscussionsData(
+        `${owner}/${name}`,
+        result.repository,
+        lastDiscussionTimestamp
+      );
+    } catch (error) {
+      console.error(`Error fetching discussions for ${owner}/${name}:`, error);
+      return [];
+    }
+  }
+
+  private async fetchComments(
+    owner: string,
+    name: string,
+    lastCommentTimestamp: string
+  ): Promise<ActivityItem[]> {
+    try {
+      const result = await this.graphqlWithAuth<GitHubCommentsOnlyResult>(
+        DISCUSSION_COMMENTS_QUERY,
+        {
+          owner,
+          name,
+          commCount: this.config.maxItemsPerRun * 5,
+        }
+      );
+
+      return this.processCommentsData(`${owner}/${name}`, result.repository, lastCommentTimestamp);
+    } catch (error) {
+      console.error(`Error fetching discussion comments for ${owner}/${name}:`, error);
+      return [];
+    }
   }
 
   public async fetchNewActivities(
@@ -103,19 +177,14 @@ export class GithubDiscussionFetcher implements ISingleSourceActivityFetcher {
     );
 
     try {
-      const result = await this.graphqlWithAuth<GitHubQueryResult>(DISCUSSION_QUERY, {
-        owner,
-        name,
-        discCount: this.config.maxItemsPerRun,
-        commCount: this.config.maxItemsPerRun,
-      });
+      // 병렬로 토론과 댓글 데이터 가져오기
+      const [discussionActivities, commentActivities] = await Promise.all([
+        this.fetchDiscussions(owner, name, lastDiscussionTimestamp),
+        this.fetchComments(owner, name, lastCommentTimestamp),
+      ]);
 
-      return this.processDiscussionData(
-        repoFullName,
-        result.repository,
-        lastDiscussionTimestamp,
-        lastCommentTimestamp
-      );
+      // 결과 합치기
+      return [...discussionActivities, ...commentActivities];
     } catch (error: unknown) {
       if (error instanceof GraphqlResponseError) {
         if (error.message.includes("rate limit exceeded"))

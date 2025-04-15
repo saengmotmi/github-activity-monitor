@@ -19,7 +19,7 @@ export class ActivityProcessor implements IActivityProcessor {
 
     const activitiesByRepo = this.groupActivitiesByRepo(fetchedActivities);
 
-    const filteredActivities = this.filterRecentActivitiesPerRepo(
+    const filteredActivities = this.filterRecentActivitiesByTypePerRepo(
       activitiesByRepo,
       config.maxItemsPerRun
     );
@@ -41,20 +41,35 @@ export class ActivityProcessor implements IActivityProcessor {
     return activitiesByRepo;
   }
 
-  private filterRecentActivitiesPerRepo(
+  private filterRecentActivitiesByTypePerRepo(
     activitiesByRepo: Record<string, ActivityItem[]>,
-    maxItemsPerRepo: number
+    maxItemsPerType: number
   ): ActivityItem[] {
     const filtered: ActivityItem[] = [];
+
     for (const repoName in activitiesByRepo) {
       const repoActivities = activitiesByRepo[repoName];
 
-      const sortedRepoActivities = [...repoActivities].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      const itemsForThisRepo = sortedRepoActivities.slice(0, maxItemsPerRepo);
-      filtered.push(...itemsForThisRepo);
+      const activitiesByType: Record<string, ActivityItem[]> = {};
+      for (const activity of repoActivities) {
+        if (!activitiesByType[activity.sourceType]) {
+          activitiesByType[activity.sourceType] = [];
+        }
+        activitiesByType[activity.sourceType].push(activity);
+      }
+
+      for (const sourceType in activitiesByType) {
+        const typeActivities = activitiesByType[sourceType];
+
+        const sortedTypeActivities = [...typeActivities].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        const itemsForThisType = sortedTypeActivities.slice(0, maxItemsPerType);
+        filtered.push(...itemsForThisType);
+      }
     }
+
     return filtered;
   }
 

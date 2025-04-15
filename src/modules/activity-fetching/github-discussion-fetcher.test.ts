@@ -27,7 +27,7 @@ describe("GithubDiscussionFetcher", () => {
   const repoFullName = "owner/repo";
 
   // Sample API response data - simplified
-  const successfulResponse: GitHubQueryResult = {
+  const successfulDiscussionsResponse = {
     repository: {
       discussions: {
         nodes: [
@@ -38,6 +38,28 @@ describe("GithubDiscussionFetcher", () => {
             createdAt: "2023-02-15T10:00:00Z",
             author: { login: "user1" },
             bodyText: "This is test discussion 1",
+          },
+          {
+            id: "D_2",
+            title: "Test Discussion 2",
+            url: "https://github.com/owner/repo/discussions/2",
+            createdAt: "2023-02-10T10:00:00Z",
+            author: { login: "user3" },
+            bodyText: "This is test discussion 2",
+          },
+        ],
+      },
+    },
+  };
+
+  const successfulCommentsResponse = {
+    repository: {
+      discussions: {
+        nodes: [
+          {
+            id: "D_1",
+            title: "Test Discussion 1",
+            url: "https://github.com/owner/repo/discussions/1",
             comments: {
               nodes: [
                 {
@@ -58,9 +80,6 @@ describe("GithubDiscussionFetcher", () => {
             id: "D_2",
             title: "Test Discussion 2",
             url: "https://github.com/owner/repo/discussions/2",
-            createdAt: "2023-02-10T10:00:00Z",
-            author: { login: "user3" },
-            bodyText: "This is test discussion 2",
             comments: {
               nodes: [
                 {
@@ -94,8 +113,15 @@ describe("GithubDiscussionFetcher", () => {
       maxItemsPerRun: 10,
     });
 
-    // Set default GraphQL response
-    graphqlMock.mockResolvedValue(successfulResponse);
+    // Set default GraphQL response - now we'll have two separate responses
+    graphqlMock.mockImplementation((query, variables) => {
+      if (query.includes("GetDiscussions")) {
+        return Promise.resolve(successfulDiscussionsResponse);
+      } else if (query.includes("GetDiscussionComments")) {
+        return Promise.resolve(successfulCommentsResponse);
+      }
+      return Promise.resolve({});
+    });
 
     // Create test instance
     fetcher = new GithubDiscussionFetcher(mockConfig);
@@ -124,15 +150,28 @@ describe("GithubDiscussionFetcher", () => {
     // Run test
     const activities = await fetcher.fetchNewActivities(repoFullName, lastProcessed);
 
-    // Verify GraphQL call (using any to avoid type errors)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (expect(graphqlMock) as any).toHaveBeenCalledWith(
-      expect.anything(),
+    // Verify GraphQL calls (now two separate calls)
+    expect(graphqlMock).toHaveBeenCalledTimes(2);
+
+    // Verify discussions query
+    expect(graphqlMock).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining("GetDiscussions"),
       expect.objectContaining({
         owner: "owner",
         name: "repo",
         discCount: mockConfig.maxItemsPerRun,
-        commCount: mockConfig.maxItemsPerRun,
+      })
+    );
+
+    // Verify comments query
+    expect(graphqlMock).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining("GetDiscussionComments"),
+      expect.objectContaining({
+        owner: "owner",
+        name: "repo",
+        commCount: mockConfig.maxItemsPerRun * 5,
       })
     );
 
@@ -197,12 +236,15 @@ describe("GithubDiscussionFetcher", () => {
   });
 
   it("should handle empty repository response", async () => {
-    graphqlMock.mockResolvedValueOnce({
-      repository: {
-        discussions: {
-          nodes: [],
+    // For this test, override the mock to return empty discussions and comments
+    graphqlMock.mockImplementation((query) => {
+      return Promise.resolve({
+        repository: {
+          discussions: {
+            nodes: [],
+          },
         },
-      },
+      });
     });
 
     const activities = await fetcher.fetchNewActivities(repoFullName, {});
