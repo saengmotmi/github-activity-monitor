@@ -1,17 +1,16 @@
-import { KyHttpClient } from "./modules/http-client/ky-http-client";
-import { GithubActivityAggregator } from "./modules/activity-fetching/github-activity-aggregator";
-import { NodeFileSystem } from "./modules/persistence/node-file-system";
-import { JsonStateManager } from "./modules/state-management/json-state-manager";
 import { AppConfig } from "./configs/app-config";
 import { ActivityMonitor } from "./core/activity-monitor";
-import { NoopSummarizer } from "./modules/summarization/noop-summarizer";
-import { GithubDiscussionFetcher } from "./modules/activity-fetching/github-discussion-fetcher";
-import { DiscordNotifier } from "./modules/notification/discord-notifier";
-import { DiscordMessageFormatter } from "./modules/notification/message-formatter/discord-message-formatter";
-import { IActivitySummarizer } from "./modules/summarization/summarizer";
 import { ActivityProcessor } from "./core/activity-processor";
 import { StateProcessor } from "./core/state-processor";
+import { GithubActivityAggregator } from "./modules/activity-fetching/github-activity-aggregator";
+import { GithubDiscussionFetcher } from "./modules/activity-fetching/github-discussion-fetcher";
+import { KyHttpClient } from "./modules/http-client/ky-http-client";
+import { DiscordNotifier } from "./modules/notification/discord-notifier";
+import { DiscordMessageFormatter } from "./modules/notification/message-formatter/discord-message-formatter";
+import { NodeFileSystem } from "./modules/persistence/node-file-system";
+import { JsonStateManager } from "./modules/state-management/json-state-manager";
 import { GeminiSummarizer } from "./modules/summarization/gemini-summarizer";
+import { IActivitySummarizer } from "./modules/summarization/summarizer";
 
 function createActivityFetcher(config: AppConfig): GithubActivityAggregator {
   const discussionFetcher = new GithubDiscussionFetcher(config);

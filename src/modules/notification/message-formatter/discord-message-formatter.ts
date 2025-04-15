@@ -1,5 +1,4 @@
 import { ActivityItem, hasSummary } from "../../../models/activity";
-import { DiscordEmbedTemplate } from "./discord-embed-template";
 import { IMessageFormatter } from "./message-formatter";
 
 export type DiscordPayload = {

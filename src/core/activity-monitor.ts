@@ -1,4 +1,3 @@
-import { AppConfig } from "../configs/app-config";
 import { IActivityFetcher } from "../modules/activity-fetching/activity-fetcher";
 import { INotifier } from "../modules/notification/notifier";
 import { IStateManager } from "../modules/state-management/state-manager";
