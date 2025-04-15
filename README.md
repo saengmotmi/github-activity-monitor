@@ -15,6 +15,16 @@ Key features:
 - Send notifications to Discord or Slack
 - Configurable tracking with flexible repository monitoring options
 
+## CAUTION: Current Implementation Status
+
+**Important Note**: This project is still under active development. Currently, only the following features are fully implemented:
+
+- Gemini AI provider for summarization
+- GitHub Discussions and Discussion Comments monitoring
+- Discord notifications
+
+Other features mentioned in the documentation will be implemented in future updates. You can also implement these interfaces yourself to add the functionality you need.
+
 ## Installation
 
 There are two ways to use this tool:
@@ -22,8 +32,9 @@ There are two ways to use this tool:
 ### Method 1: Fork and Configure (Recommended)
 
 1. Fork this repository to your GitHub account
-2. Configure your `.env` and `monitor.config.ts` files
-3. Set up GitHub Actions workflow (see below)
+2. **Important**: Delete the `state.json` file if it exists in your forked repository to start with a clean state
+3. Configure your `.env` and `monitor.config.ts` files
+4. Set up GitHub Actions workflow (see below)
 
 ### Method 2: Local Installation
 
