@@ -1,0 +1,57 @@
+# .github/workflows/monitor.yaml
+name: GitHub Activity Monitor
+
+on:
+  schedule:
+    # 2시간마다 실행하되, 한국시간 오전 0시-8시(UTC 15:00-23:00) 제외
+    - cron: "0 0,2,4,6,8,10,12,14 * * *"
+  workflow_dispatch: # 수동 실행 가능
+
+env:
+  GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ">=20.0.0"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run GitHub Activity Monitor
+        run: pnpm start
+
+      - name: Commit and push state changes
+        if: success()
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add state.json
+          if git diff --staged --quiet state.json; then
+            echo "No changes to state.json to commit."
+          else
+            git commit -m "chore: update monitor state [skip ci]"
+            git push
+            echo "Committed and pushed state.json changes."
+          fi
