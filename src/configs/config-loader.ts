@@ -40,7 +40,7 @@ export function loadAndValidateConfig(): AppConfig {
 function getSecretsFromEnv(): AppSecrets {
   console.log("Assembling configuration from environment variables...");
   return {
-    githubPat: process.env.GITHUB_PAT || "",
+    githubPat: process.env.MONITOR_GITHUB_PAT || "",
     openaiApiKey: process.env.OPENAI_API_KEY,
     geminiApiKey: process.env.GOOGLE_API_KEY,
     claudeApiKey: process.env.CLAUDE_API_KEY,
@@ -63,7 +63,7 @@ function getVariablesFromMonitorConfig(): AppVariables {
 function validateAppConfig(config: AppConfig): void {
   console.log("Validating configuration...");
 
-  if (config.githubPat === "") throw new Error("Missing required config: GITHUB_PAT (Secret)");
+  if (config.githubPat === "") throw new Error("Missing required config: MONITOR_GITHUB_PAT (Secret)");
 
   if (config.repoConfigs.length === 0)
     throw new Error("Missing or invalid required config: RepoConfigs");

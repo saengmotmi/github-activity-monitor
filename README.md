@@ -57,7 +57,7 @@ cp .env.example .env
 Create a `.env` file with the following variables:
 
 ```
-GITHUB_PAT=your_github_pat
+MONITOR_GITHUB_PAT=your_github_pat
 OPENAI_API_KEY=your_openai_api_key
 GOOGLE_API_KEY=your_google_api_key
 CLAUDE_API_KEY=your_claude_api_key
@@ -65,7 +65,7 @@ DISCORD_WEBHOOK_URL=your_discord_webhook_url
 SLACK_WEBHOOK_URL=your_slack_webhook_url
 ```
 
-**Note:** At minimum, you need to provide `GITHUB_PAT` and either `DISCORD_WEBHOOK_URL` or `SLACK_WEBHOOK_URL`.
+**Note:** At minimum, you need to provide `MONITOR_GITHUB_PAT` and either `DISCORD_WEBHOOK_URL` or `SLACK_WEBHOOK_URL`.
 
 **Important for GitHub PAT**: When creating your GitHub Personal Access Token, make sure to enable read permissions for all repository resources, especially:
 
@@ -107,7 +107,7 @@ This repository includes a GitHub Actions workflow that automatically runs the m
 1. Fork this repository to your GitHub account
 2. Go to your forked repository's Settings > Secrets and variables > Actions
 3. Add the required environment variables as repository secrets:
-   - `GITHUB_PAT`
+   - `MONITOR_GITHUB_PAT`
    - `DISCORD_WEBHOOK_URL` or `SLACK_WEBHOOK_URL`
    - Optional: `GOOGLE_API_KEY`, `OPENAI_API_KEY`, or `CLAUDE_API_KEY` (for summarization)
 4. Edit the `.github/workflows/monitor.yml` file to customize the schedule
