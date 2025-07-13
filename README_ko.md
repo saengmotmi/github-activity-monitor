@@ -57,7 +57,7 @@ cp .env.example .env
 다음 변수를 포함하는 `.env` 파일을 생성하세요:
 
 ```
-GITHUB_PAT=your_github_pat
+MONITOR_GITHUB_PAT=your_github_pat
 OPENAI_API_KEY=your_openai_api_key
 GOOGLE_API_KEY=your_google_api_key
 CLAUDE_API_KEY=your_claude_api_key
@@ -65,7 +65,7 @@ DISCORD_WEBHOOK_URL=your_discord_webhook_url
 SLACK_WEBHOOK_URL=your_slack_webhook_url
 ```
 
-**참고:** 최소한 `GITHUB_PAT`와 `DISCORD_WEBHOOK_URL` 또는 `SLACK_WEBHOOK_URL` 중 하나를 제공해야 합니다.
+**참고:** 최소한 `MONITOR_GITHUB_PAT`와 `DISCORD_WEBHOOK_URL` 또는 `SLACK_WEBHOOK_URL` 중 하나를 제공해야 합니다.
 
 **GitHub PAT 생성 시 중요 사항**: GitHub 개인 액세스 토큰(PAT)을 생성할 때 모든 저장소 리소스에 대한 읽기 권한을 활성화해야 합니다. 특히 다음 권한이 필요합니다:
 
@@ -107,7 +107,7 @@ export const config = {
 1. 이 저장소를 GitHub 계정으로 포크합니다
 2. 포크한 저장소의 Settings > Secrets and variables > Actions로 이동합니다
 3. 필요한 환경 변수를 저장소 시크릿으로 추가합니다:
-   - `GITHUB_PAT`
+   - `MONITOR_GITHUB_PAT`
    - `DISCORD_WEBHOOK_URL` 또는 `SLACK_WEBHOOK_URL`
    - 선택 사항: `GOOGLE_API_KEY`, `OPENAI_API_KEY`, 또는 `CLAUDE_API_KEY` (요약 기능용)
 4. `.github/workflows/monitor.yml` 파일을 편집하여 일정을 사용자 정의합니다
